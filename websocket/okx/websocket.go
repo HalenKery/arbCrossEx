@@ -7,16 +7,9 @@ import (
 	"net/http"
 	"time"
 
+	. "arbCrossEx/websocket"
 	"github.com/gorilla/websocket"
 )
-
-type WsHandler func(message []byte)
-
-type ErrHandler func(err error)
-
-type WsConfig struct {
-	Endpoint string
-}
 
 type WebsocketStreamClient struct {
 	Endpoint   string

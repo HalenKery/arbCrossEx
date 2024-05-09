@@ -5,6 +5,7 @@ import (
 	"arbCrossEx/handlers"
 	"arbCrossEx/manager"
 	"arbCrossEx/models"
+	. "arbCrossEx/websocket"
 	"arbCrossEx/websocket/binance"
 	"arbCrossEx/websocket/okx"
 	"fmt"
@@ -44,7 +45,7 @@ func main() {
 func WsDepthHandlerBN(symbol string) {
 	msg := gvl.GetMinOrderBookChan()
 	websocketStreamClient := binance.NewWebsocketStreamClient(false)
-	wsDepthHandler := func(event *binance.WsDepthEvent) {
+	wsDepthHandler := func(event *WsDepthEvent) {
 		b1 := event.Bids[0]
 		a1 := event.Asks[0]
 		bp, err := strconv.ParseFloat(b1.Price, 64)
@@ -91,7 +92,7 @@ func WsDepthHandlerBN(symbol string) {
 func WsDepthHandlerOK(symbol string) {
 	msg := gvl.GetMinOrderBookChan()
 	websocketStreamClient := okx.NewWebsocketStreamClient()
-	wsDepthHandler := func(event *okx.WsDepthEvent) {
+	wsDepthHandler := func(event *WsDepthEvent) {
 		if event.Event != "books5" {
 			return
 		}

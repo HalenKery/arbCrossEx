@@ -1,57 +1,20 @@
 package binance
 
 import (
+	. "arbCrossEx/websocket"
 	"fmt"
-	"github.com/bitly/go-simplejson"
-	"strconv"
 	"strings"
-	"time"
 )
-
-func newJSON(data []byte) (j *simplejson.Json, err error) {
-	j, err = simplejson.NewJson(data)
-	if err != nil {
-		return nil, err
-	}
-	return j, nil
-}
-
-type PriceLevel struct {
-	Price    string
-	Quantity string
-}
-
-func (p *PriceLevel) Parse() (float64, float64, error) {
-	price, err := strconv.ParseFloat(p.Price, 64)
-	if err != nil {
-		return 0, 0, err
-	}
-	quantity, err := strconv.ParseFloat(p.Quantity, 64)
-	if err != nil {
-		return price, 0, err
-	}
-	return price, quantity, nil
-}
-
-type Ask = PriceLevel
-
-type Bid = PriceLevel
-
-var (
-	WebsocketTimeout   = time.Second * 60
-	WebsocketKeepalive = false
-)
-
-type WsDepthHandler func(event *WsDepthEvent)
 
 func (c *WebsocketStreamClient) WsDepthServe(symbol string, handler WsDepthHandler, errHandler ErrHandler) (doneCh, stopCh chan struct{}, err error) {
 	endpoint := fmt.Sprintf("%s/%s@depth", c.Endpoint, strings.ToLower(symbol))
 	return wsDepthServe(endpoint, handler, errHandler)
 }
+
 func wsDepthServe(endpoint string, handler WsDepthHandler, errHandler ErrHandler) (doneCh, stopCh chan struct{}, err error) {
-	cfg := newWsConfig(endpoint)
+	cfg := NewWsConfig(endpoint)
 	wsHandler := func(message []byte) {
-		j, err := newJSON(message)
+		j, err := NewJSON(message)
 		if err != nil {
 			errHandler(err)
 			return
@@ -83,14 +46,4 @@ func wsDepthServe(endpoint string, handler WsDepthHandler, errHandler ErrHandler
 		handler(event)
 	}
 	return wsServe(cfg, wsHandler, errHandler)
-}
-
-type WsDepthEvent struct {
-	Event         string `json:"e"`
-	Time          int64  `json:"E"`
-	Symbol        string `json:"s"`
-	FirstUpdateID int64  `json:"U"`
-	LastUpdateID  int64  `json:"u"`
-	Bids          []Bid  `json:"b"`
-	Asks          []Ask  `json:"a"`
 }

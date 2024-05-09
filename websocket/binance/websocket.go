@@ -5,16 +5,9 @@ import (
 	"net/http"
 	"time"
 
+	. "arbCrossEx/websocket"
 	"github.com/gorilla/websocket"
 )
-
-type WsHandler func(message []byte)
-
-type ErrHandler func(err error)
-
-type WsConfig struct {
-	Endpoint string
-}
 
 type WebsocketStreamClient struct {
 	Endpoint   string
@@ -38,12 +31,6 @@ func NewWebsocketStreamClient(isCombined bool, baseURL ...string) *WebsocketStre
 	return &WebsocketStreamClient{
 		Endpoint:   url,
 		IsCombined: isCombined,
-	}
-}
-
-func newWsConfig(endpoint string) *WsConfig {
-	return &WsConfig{
-		Endpoint: endpoint,
 	}
 }
 
