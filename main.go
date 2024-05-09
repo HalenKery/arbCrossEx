@@ -6,6 +6,7 @@ import (
 	"arbCrossEx/manager"
 	"arbCrossEx/models"
 	"arbCrossEx/websocket/binance"
+	"arbCrossEx/websocket/okx"
 	"fmt"
 	"os"
 	"os/signal"
@@ -14,8 +15,8 @@ import (
 )
 
 func main() {
-	go WsDepthHandler("BTCUSDT")
-	go WsDepthHandlerCopy("ETHUSDT")
+	go WsDepthHandlerBN("BTCUSDT")
+	go WsDepthHandlerOK("BTC-USDT")
 	go func() {
 		obManager := manager.ObManager{
 			Book: make(map[string][]models.MinOrderBook),
@@ -40,7 +41,7 @@ func main() {
 	<-quit
 }
 
-func WsDepthHandler(symbol string) {
+func WsDepthHandlerBN(symbol string) {
 	msg := gvl.GetMinOrderBookChan()
 	websocketStreamClient := binance.NewWebsocketStreamClient(false)
 	wsDepthHandler := func(event *binance.WsDepthEvent) {
@@ -87,10 +88,13 @@ func WsDepthHandler(symbol string) {
 	<-doneCh
 }
 
-func WsDepthHandlerCopy(symbol string) {
+func WsDepthHandlerOK(symbol string) {
 	msg := gvl.GetMinOrderBookChan()
-	websocketStreamClient := binance.NewWebsocketStreamClient(false)
-	wsDepthHandler := func(event *binance.WsDepthEvent) {
+	websocketStreamClient := okx.NewWebsocketStreamClient()
+	wsDepthHandler := func(event *okx.WsDepthEvent) {
+		if event.Event != "books5" {
+			return
+		}
 		b1 := event.Bids[0]
 		a1 := event.Asks[0]
 		bp, err := strconv.ParseFloat(b1.Price, 64)

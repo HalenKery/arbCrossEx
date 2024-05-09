@@ -1,7 +1,6 @@
 package binance
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -20,11 +19,6 @@ type WsConfig struct {
 type WebsocketStreamClient struct {
 	Endpoint   string
 	IsCombined bool
-}
-
-func PrettyPrint(i interface{}) string {
-	s, _ := json.MarshalIndent(i, "", "\t")
-	return string(s)
 }
 
 func NewWebsocketStreamClient(isCombined bool, baseURL ...string) *WebsocketStreamClient {
